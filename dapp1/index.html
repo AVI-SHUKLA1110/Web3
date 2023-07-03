@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avi's First dApp</title>
+  <style>
+    body {
+      background-color: #f7f7f7;
+      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #444;
+      font-size: 28px;
+      margin-top: 0;
+    }
+
+    p {
+      color: #666;
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .button-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .button-wrapper button {
+      flex-basis: 48%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-wrapper button:hover {
+      background-color: #45a049;
+    }
+
+    #showMood {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>My First dApp</h1>
+    <p>Let's Start Something on the Blockchain</p>
+    <label for="mood">How are you feeling today?</label>
+    <input type="text" id="mood" placeholder="Enter your mood" />
+    <div class="button-wrapper">
+      <button onclick="getMood()">Get Mood</button>
+      <button onclick="setMood()">Set Mood</button>
+    </div>
+    <p id="showMood"></p>
+  </div>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+  <script>
+    const MoodContractAddress = "0x700d52EC35ae8aE041816a0906871b2E82A15833";
+    const MoodContractABI = [
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_mood",
+            "type": "string"
+          }
+        ],
+        "name": "setMood",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getMood",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    let MoodContract = undefined;
+    let signer = undefined;
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "sepolia");
+
+    provider.send("eth_requestAccounts", []).then(() => {
+      provider.listAccounts().then((accounts) => {
+        signer = provider.getSigner(accounts[0]);
+        MoodContract = new ethers.Contract(
+          MoodContractAddress,
+          MoodContractABI,
+          signer
+        );
+      });
+    });
+
+    async function getMood() {
+      const mood = await MoodContract.getMood();
+      document.getElementById("showMood").innerText = `Your Mood: ${mood}`;
+      console.log(mood);
+    }
+
+    async function setMood() {
+      const mood = document.getElementById("mood").value;
+      await MoodContract.setMood(mood);
+    }
+  </script>
+</body>
+
+</html>
